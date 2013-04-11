@@ -1,0 +1,20 @@
+#guides .guide {
+  position: absolute;
+  width: 1px;
+  background-color: blue;
+}
+
+#guides .v-ruler {
+  position: absolute;
+  width: 10px;
+  height: 100px;
+  opacity: .3;
+  background-color: red;
+}
+
+#guides .h-ruler {
+  position: absolute;
+  width: 100%;
+  opacity: .3;
+  background-color: blue;
+}

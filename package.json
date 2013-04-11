@@ -1,0 +1,12 @@
+{
+  "name": "guides",
+  "description": "Photoshop like guides for your browser",
+  "author": "Sonny King <sonny@sonnyking.com>",
+  "version": "0.0.1",
+  "dependencies": {
+    "grunt": ">=0.4.1",
+    "grunt-contrib-watch": "",
+    "grunt-contrib-sass": "",
+    "connect": ""
+  }
+}
