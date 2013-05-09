@@ -29,11 +29,10 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
-
   grunt.registerTask('default', ['server']);
   grunt.registerTask('watch', ['watch']);
   grunt.registerTask('sass', ['sass']);
-  grunt.registerTask('server', 'Start a custom web server.', function() {
+  grunt.registerTask('server', 'Start and hold a web server open.', function() {
     var done = this.async();
     grunt.log.writeln('Starting web server on port 3502.');
     require('./lib/server.js').listen(3502).on('close', done);

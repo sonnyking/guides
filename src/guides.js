@@ -2,6 +2,9 @@
   "use strict";
 
   var _visible, _rulers, _guides, _root, _shadow;
+  var TYPE_RULER_H = "horizontal";
+  var TYPE_RULER_V = "vertical";
+  var SIZE_RULER = 10;
 
   var init = function () {
     _visible = false;
@@ -49,22 +52,28 @@
           'width: 1px;' +
           'background-color: blue;' +
         '}' +
-        '.v-ruler {' +
+        '.vertical-ruler {' +
           'position: absolute;' +
-          'width: 10px;' +
+          'width: 20px;' +
           'height: 100%;' +
           'top: 0px;' +
           'left: 0px;' +
           'z-index: 3000;' +
           'opacity: 0;' +
-          'background-color: red;' +
+          'background-color: rgba(255,255,255, 0.5);' +
+          'border-right: 1px solid black;' +
           'cursor: pointer;' +
         '}' +
-        '.h-ruler {' +
+        '.horizontal-ruler {' +
           'position: absolute;' +
+          'top: 0px;' +
+          'left: 0px;' +
+          'height: 20px;' +
           'width: 100%;' +
-          'opacity: .3;' +
-          'background-color: blue;' +
+          'opacity: 0;' +
+          'background-color: rgba(255,255,255, 0.5);' +
+          'border-bottom: 1px solid black;' +
+          'cursor: pointer;' +
         '}' +
         '.show {' +
           'display: block;' +
@@ -86,13 +95,47 @@
   var render = function () {
     console.log('guides render');
     injectStyle();
-
     for (var i = _rulers.length - 1; i >= 0; i--) {
-      var ruler = document.createElement('div');
-      ruler.setAttribute('class', 'v-ruler guides');
+      var ruler = document.createElement('canvas');
+      ruler.setAttribute('class', _rulers[i] + '-ruler guides');
       _shadow.appendChild(ruler);
+      renderRuler(ruler, _rulers[i])
     }
   };
+
+  var renderRuler = function(canvas, type) {
+    var context = canvas.getContext('2d');
+
+    // set height width
+    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : window.innerWidth;
+    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : window.innerHeight;
+    // setup the line style
+    context.strokeStyle = '#000';
+    context.lineWidth = 1;
+    // anti-alias hack
+    context.translate(0.5, 0.5)
+
+    var x = 10;
+    var y = 10;
+
+    for (var i = 100 - 1; i >= 0; i--) {
+      var offset = 2;
+      if(i%2 == 0) {
+        offset = SIZE_RULER/2;
+      }
+      context.beginPath();
+        if(type === TYPE_RULER_H){
+          context.moveTo(x+=10,offset);
+          context.lineTo(x, y+10);
+        }
+        else{
+          context.moveTo(offset,y+=10);
+          context.lineTo(x+10, y);
+        }
+      context.closePath();
+      context.stroke();
+    };
+  }
 
   var clear = function () {
     console.log('guides clear');
@@ -115,7 +158,6 @@
     console.log('guides hide');
     removeClass(_shadow.getElementsByClassName('guides'), 'show');
   };
-
 
   var addClass = function (list, className) {
     for (var i = list.length - 1; i >= 0; i--) {
