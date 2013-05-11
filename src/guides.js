@@ -111,7 +111,6 @@
         '.vertical-ruler {' +
           'position: absolute;' +
           'width: ' + SIZE_RULER + 'px;' +
-          'height: 100%;' +
           'top: 0px;' +
           'left: 0px;' +
           'z-index: 3000;' +
@@ -137,7 +136,6 @@
           'top: 0px;' +
           'left: 0px;' +
           'height: ' + SIZE_RULER + 'px;' +
-          'width: 100%;' +
           'opacity: 0;' +
           'visibility: hidden;' +
           'background-color: rgba(255,255,255, 0.5);' +
@@ -184,23 +182,43 @@
     _hIndicator.setAttribute('class','hIndicator guides');
     _shadow.appendChild(_hIndicator);
 
-
     // add mouse cord indicator
     _mouse = document.createElement('div');
     _mouse.setAttribute('class','mouse guides');
     _shadow.appendChild(_mouse);
 
-    for (var i = _rulers.length - 1; i >= 0; i--) {
-      var ruler = document.createElement('canvas');
-      ruler.setAttribute('class', _rulers[i] + '-ruler guides');
-      _shadow.appendChild(ruler);
-      renderRuler(ruler, _rulers[i])
-    }
+    renderRulers();
 
     disableDraggingFor(document.getElementById("guides"));
   };
 
-  var renderRuler = function(canvas, type) {
+  var renderRulers = function () {
+    console.log("render rulers");
+    removeRulers();
+    for (var i = _rulers.length - 1; i >= 0; i--) {
+      var ruler = document.createElement('canvas');
+      ruler.setAttribute('class', _rulers[i] + '-ruler guides');
+      ruler.setAttribute('id', _rulers[i] + 'Ruler');
+      if(_visible){
+        addClass([ruler], 'show');
+      }
+      _shadow.appendChild(ruler);
+      renderRuler(ruler, _rulers[i]);
+    }
+  }
+
+  var removeRulers = function () {
+    console.log("remove rulers");
+    for (var i = _rulers.length - 1; i >= 0; i--) {
+      var ruler = _shadow.getElementById(_rulers[i] + 'Ruler');
+      if(ruler != null) {
+        _shadow.removeChild(ruler);
+      }
+    }
+  }
+
+  var renderRuler = function (canvas, type) {
+    console.log("render ruler");
     var context = canvas.getContext('2d');
 
     // set height width
@@ -210,7 +228,10 @@
     context.strokeStyle = '#000';
     context.lineWidth = 1;
     // anti-alias hack
-    context.translate(0.5, 0.5)
+    context.translate(0.5, 0.5);
+
+    console.log("Window w: " + window.innerWidth + " h: " + window.innerHeight);
+    console.log("Canvas w: " + canvas.width + " h: " + canvas.height);
 
     var x = SIZE_RULER;
     var y = SIZE_RULER;
@@ -248,8 +269,7 @@
 
   var handleResize = function() {
     console.log('resize');
-    render();
-    toggleVisiblity();
+    renderRulers();
   }
 
   var trackMouse = function(event) {
@@ -297,15 +317,22 @@
     var guide = document.createElement('div');
     guide.setAttribute('class', orientation + '-guide guides show');
     guide.setAttribute('data-index', _guides.length-1);
+    guide.setAttribute('id', _guides.length);
     _shadow.appendChild(guide);
     var guideObject = { "element" : guide, "type": orientation };
-    _guides.push(guideObject);
     return guideObject;
   }
 
   var place = function () {
+    if(_visible == false){ return false; }
+    if((_currentGuide.type == TYPE_GUIDE_H && _currentGuide.element.offsetTop <= SIZE_RULER)
+      || (_currentGuide.type == TYPE_GUIDE_V) && _currentGuide.element.offsetLeft <= SIZE_RULER) {
+      _shadow.removeChild(_currentGuide.element);
+    }
+    else {
+      save(_currentGuide.element);
+    }
     _currentGuide = undefined;
-    save();
   }
 
   var clear = function () {
@@ -316,8 +343,9 @@
     console.log('guides lock');
   };
 
-  var save = function () {
+  var save = function (guide) {
     console.log('guides save');
+    _guides.push(guide);
   };
 
 
