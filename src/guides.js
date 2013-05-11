@@ -1,17 +1,32 @@
 ;guides = (function () {
   "use strict";
 
-  var _visible, _mouse, _vIndicator, _hIndicator, _rulers, _guides, _root, _shadow;
+  var _visible
+    , _mouse
+    , _vIndicator
+    , _hIndicator
+    , _rulers
+    , _guides
+    , _currentGuide
+    , _root
+    , _shadow;
+
   var TYPE_RULER_H = "horizontal";
   var TYPE_RULER_V = "vertical";
+  var TYPE_GUIDE_H = "horizontal";
+  var TYPE_GUIDE_V = "vertical";
   var SIZE_RULER = 10;
+
   var options = {};
   options.RenderText = false;
+
+  var _currentPosition = { x: 0, y: 0 };
+
 
   var init = function () {
     _visible = false;
     _rulers = ["horizontal","vertical"];
-    _guides = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+    _guides = new Array();
 
     _root = document.createElement('div');
     _root.setAttribute('id', 'guides');
@@ -22,6 +37,8 @@
     document.addEventListener('keydown', keystrokeHandler);
     window.onresize = handleResize;
     window.onmousemove = trackMouse;
+    window.onmousedown = handleClick;
+    window.onmouseup = place;
     render();
   };
 
@@ -50,10 +67,23 @@
   var injectStyle = function () {
     _shadow.innerHTML = 
       '<style>' +
-        '.guide {' +
+        '.' + TYPE_GUIDE_H + '-guide {' +
           'position: absolute;' +
+          'top: ' + SIZE_RULER + 'px;' +
+          'left: ' + SIZE_RULER + 'px;' +
+          'width: 100%;' +
+          'height: 1px;' +
+          'background-color: #05F7F3;' +
+          'color: red;' +
+        '}' +
+        '.' + TYPE_GUIDE_V + '-guide {' +
+          'position: absolute;' +
+          'top: ' + SIZE_RULER + 'px;' +
+          'left: ' + SIZE_RULER + 'px;' +
           'width: 1px;' +
-          'background-color: blue;' +
+          'height: 100%;' +
+          'background-color: #05F7F3;' +
+          'color: red;' +
         '}' +
         '.mouse {' +
           'position: absolute;' +
@@ -64,6 +94,7 @@
           'z-index: 3000;' +
           'font-size: .5em;' +
           'opacity: 0;' +
+          'visibility: hidden;' +
           'background-color: transparent;' +
         '}' +
         '.vIndicator {' +
@@ -72,8 +103,10 @@
           'width: ' + SIZE_RULER + 'px;' +
           'height: 1px;' +
           'opacity: 0;' +
+          'visibility: hidden;' +
           'background-color: red;' +
           'z-index: 3001;' +
+          'cursor: pointer;' +
         '}' +
         '.vertical-ruler {' +
           'position: absolute;' +
@@ -83,6 +116,7 @@
           'left: 0px;' +
           'z-index: 3000;' +
           'opacity: 0;' +
+          'visibility: hidden;' +
           'background-color: rgba(255,255,255, 0.5);' +
           'border-right: 1px solid black;' +
           'cursor: pointer;' +
@@ -93,8 +127,10 @@
           'height: ' + SIZE_RULER + 'px;' +
           'width: 1px;' +
           'opacity: 0;' +
+          'visibility: hidden;' +
           'background-color: red;' +
           'z-index: 3001;' +
+          'cursor: pointer;' +
         '}' +
         '.horizontal-ruler {' +
           'position: absolute;' +
@@ -103,6 +139,7 @@
           'height: ' + SIZE_RULER + 'px;' +
           'width: 100%;' +
           'opacity: 0;' +
+          'visibility: hidden;' +
           'background-color: rgba(255,255,255, 0.5);' +
           'border-bottom: 1px solid black;' +
           'cursor: pointer;' +
@@ -110,6 +147,7 @@
         '.show {' +
           'display: block;' +
           'opacity: 1;' +
+          'visibility: visible;' +
         '}' +
         '#guides {' +
           'position: absolute;' +
@@ -120,6 +158,14 @@
           'background-color: blue;' +
           'opacity: 1;' +
           'transition: opacity 2s;' +
+        '}' +
+        '#guides * {' +
+          '-webkit-touch-callout: none;' +
+          '-webkit-user-select: none;' +
+          '-khtml-user-select: none;' +
+          '-moz-user-select: none;' +
+          '-ms-user-select: none;' +
+          'user-select: none;' +
         '}' +
       '</style>';
   };
@@ -142,7 +188,6 @@
     // add mouse cord indicator
     _mouse = document.createElement('div');
     _mouse.setAttribute('class','mouse guides');
-    _mouse.innerHTML = "Hello";
     _shadow.appendChild(_mouse);
 
     for (var i = _rulers.length - 1; i >= 0; i--) {
@@ -151,6 +196,8 @@
       _shadow.appendChild(ruler);
       renderRuler(ruler, _rulers[i])
     }
+
+    disableDraggingFor(document.getElementById("guides"));
   };
 
   var renderRuler = function(canvas, type) {
@@ -206,6 +253,9 @@
   }
 
   var trackMouse = function(event) {
+    _currentPosition.x = event.clientX;
+    _currentPosition.y = event.clientY;
+
     _mouse.style.left = (event.clientX + 10)  + "px";
     _mouse.style.top = (event.clientY - 5)  + "px";
     _mouse.innerHTML = 'x:' + event.clientX + ' y:' + event.clientY;
@@ -213,6 +263,49 @@
     _vIndicator.style.top = event.clientY  + "px";
     _hIndicator.style.left = event.clientX  + "px";
 
+    if(typeof _currentGuide != "undefined") {
+      if(_currentGuide.type === TYPE_GUIDE_H){
+        _currentGuide.element.style.top = event.clientY + "px";
+      }
+      else {
+        _currentGuide.element.style.left = event.clientX + "px";
+      }
+    }
+
+  }
+
+  // guide methods
+
+  var handleClick = function () {
+    console.log("click");
+    if(_visible && (_currentPosition.y <= SIZE_RULER || _currentPosition.x <= SIZE_RULER)){
+      console.log("evaluate for guide drag");
+      var orientation;
+      if(_currentPosition.x > SIZE_RULER){
+        orientation = TYPE_GUIDE_H;
+      }
+      else {
+        orientation = TYPE_GUIDE_V;
+      }
+
+      _currentGuide = create(orientation);
+    }
+  }
+
+  var create = function (orientation) {
+    console.log('guides create');
+    var guide = document.createElement('div');
+    guide.setAttribute('class', orientation + '-guide guides show');
+    guide.setAttribute('data-index', _guides.length-1);
+    _shadow.appendChild(guide);
+    var guideObject = { "element" : guide, "type": orientation };
+    _guides.push(guideObject);
+    return guideObject;
+  }
+
+  var place = function () {
+    _currentGuide = undefined;
+    save();
   }
 
   var clear = function () {
@@ -226,6 +319,19 @@
   var save = function () {
     console.log('guides save');
   };
+
+
+  // general methods
+
+  var disableDraggingFor = function (element) {
+    // this works for FireFox and WebKit in future according to http://help.dottoro.com/lhqsqbtn.php
+    element.draggable = false;
+    // this works for older web layout engines
+    element.onmousedown = function(event) {
+      event.preventDefault();
+      return false;
+    };
+  }
 
   var show = function () {
     console.log('guides show');
