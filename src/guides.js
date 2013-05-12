@@ -75,6 +75,9 @@
           'height: 1px;' +
           'background-color: #05F7F3;' +
           'color: red;' +
+          'opacity: 0;' +
+          'visibility: hidden;' +
+          'cursor: row-resize;' +
         '}' +
         '.' + TYPE_GUIDE_V + '-guide {' +
           'position: absolute;' +
@@ -84,6 +87,9 @@
           'height: 100%;' +
           'background-color: #05F7F3;' +
           'color: red;' +
+          'opacity: 0;' +
+          'visibility: hidden;' +
+          'cursor: col-resize;' +
         '}' +
         '.mouse {' +
           'position: absolute;' +
@@ -296,7 +302,7 @@
 
   // guide methods
 
-  var handleClick = function () {
+  var handleClick = function (event) {
     console.log("click");
     if(_visible && (_currentPosition.y <= SIZE_RULER || _currentPosition.x <= SIZE_RULER)){
       console.log("evaluate for guide drag");
@@ -316,21 +322,21 @@
     console.log('guides create');
     var guide = document.createElement('div');
     guide.setAttribute('class', orientation + '-guide guides show');
-    guide.setAttribute('data-index', _guides.length-1);
     guide.setAttribute('id', _guides.length);
+    guide.addEventListener('mousedown', move, false);
     _shadow.appendChild(guide);
     var guideObject = { "element" : guide, "type": orientation };
     return guideObject;
   }
 
   var place = function () {
-    if(_visible == false){ return false; }
+    if(_visible == false || typeof _currentGuide === 'undefined') { return false; }
     if((_currentGuide.type == TYPE_GUIDE_H && _currentGuide.element.offsetTop <= SIZE_RULER)
       || (_currentGuide.type == TYPE_GUIDE_V) && _currentGuide.element.offsetLeft <= SIZE_RULER) {
       _shadow.removeChild(_currentGuide.element);
     }
     else {
-      save(_currentGuide.element);
+      save(_currentGuide);
     }
     _currentGuide = undefined;
   }
@@ -345,8 +351,15 @@
 
   var save = function (guide) {
     console.log('guides save');
+    guide.element.setAttribute('data-index', _guides.length);
     _guides.push(guide);
   };
+
+  var move = function (event) {
+    console.log('move guide');
+    var index = event.target.getAttribute('data-index');
+    _currentGuide = _guides[index];
+  }
 
 
   // general methods
