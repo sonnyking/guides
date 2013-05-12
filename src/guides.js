@@ -237,7 +237,7 @@
     var y = SIZE_RULER;
     var count = (type === TYPE_RULER_V) ? Math.floor(window.innerHeight/10) : Math.floor(window.innerWidth/10);
 
-    for (var i = count - 1; i >= 0; i--) {
+    for (var i = 0; i < count; i++) {
       var offset = Math.floor(SIZE_RULER/2);
       if(i%2 == 0) {
         offset = Math.floor(offset/4);
