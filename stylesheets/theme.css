@@ -12,9 +12,9 @@ a {
 	height: 6em;
 }
 
-.logo {
+div.logo {
 	position: absolute;
-	margin: 0 0 0 3em;
+	margin: 0 0 0 5%;
 }
 
 .logo img, .logo strong {
