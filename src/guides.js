@@ -7,6 +7,7 @@
     , _hIndicator
     , _rulers
     , _guides
+    , _keys
     , _currentGuide
     , _root
     , _shadow;
@@ -16,6 +17,8 @@
   var TYPE_GUIDE_H = "horizontal";
   var TYPE_GUIDE_V = "vertical";
   var SIZE_RULER = 10;
+  var KEY_ONE = 82;
+  var KEY_TWO = 71;
 
   var options = {};
   options.RenderText = false;
@@ -27,6 +30,7 @@
     _visible = false;
     _rulers = ["horizontal","vertical"];
     _guides = new Array();
+    _keys = {};
 
     _root = document.createElement('div');
     _root.setAttribute('id', 'guides');
@@ -34,7 +38,8 @@
     _shadow = _root.webkitCreateShadowRoot();
 
     // event listeners
-    document.addEventListener('keydown', keystrokeHandler);
+    document.addEventListener('keydown', keydownHandler);
+    document.addEventListener('keyup', keyupHandler);
     window.onresize = handleResize;
     window.onmousemove = trackMouse;
     window.onmousedown = handleClick;
@@ -42,12 +47,20 @@
     render();
   };
 
-  var keystrokeHandler = function (event) {
-    // console.log("key press: " + event.keyCode);
-    if(event.keyCode === 82) {
-      toggleVisiblity();
+  var keydownHandler = function (event) {
+    if(event.keyCode === KEY_ONE || event.keyCode === KEY_TWO) {
+      _keys['' + event.keyCode] = true;
+      if(_keys['' + KEY_ONE] && _keys['' + KEY_TWO]) {
+        toggleVisiblity();
+      }
     }
   };
+
+  var keyupHandler = function (event) {
+    if(event.keyCode === KEY_ONE || event.keyCode === KEY_TWO) {
+      _keys['' + event.keyCode] = undefined;
+    }
+  }
 
   var toggleVisiblity = function () {
     if(_visible === false) {
@@ -59,7 +72,6 @@
   };
 
   var inject = function () {
-    console.log('guides inject');
     /* inject guides into the dom, this function
     id used by the node processes on the server side */
   };
@@ -175,7 +187,6 @@
   };
 
   var render = function () {
-    console.log('guides render');
     _shadow.innerHTML = '';
 
     injectStyle();
@@ -199,7 +210,6 @@
   };
 
   var renderRulers = function () {
-    console.log("render rulers");
     removeRulers();
     for (var i = _rulers.length - 1; i >= 0; i--) {
       var ruler = document.createElement('canvas');
@@ -214,7 +224,6 @@
   }
 
   var removeRulers = function () {
-    console.log("remove rulers");
     for (var i = _rulers.length - 1; i >= 0; i--) {
       var ruler = _shadow.getElementById(_rulers[i] + 'Ruler');
       if(ruler != null) {
@@ -224,7 +233,6 @@
   }
 
   var renderRuler = function (canvas, type) {
-    console.log("render ruler");
     var context = canvas.getContext('2d');
 
     // set height width
@@ -235,9 +243,6 @@
     context.lineWidth = 1;
     // anti-alias hack
     context.translate(0.5, 0.5);
-
-    console.log("Window w: " + window.innerWidth + " h: " + window.innerHeight);
-    console.log("Canvas w: " + canvas.width + " h: " + canvas.height);
 
     var x = SIZE_RULER;
     var y = SIZE_RULER;
@@ -274,7 +279,6 @@
   }
 
   var handleResize = function() {
-    console.log('resize');
     renderRulers();
   }
 
@@ -303,9 +307,7 @@
   // guide methods
 
   var handleClick = function (event) {
-    console.log("click");
-    if(_visible && (_currentPosition.y <= SIZE_RULER || _currentPosition.x <= SIZE_RULER)){
-      console.log("evaluate for guide drag");
+    if(_visible && (_currentPosition.y <= SIZE_RULER || _currentPosition.x <= SIZE_RULER)) {
       var orientation;
       if(_currentPosition.x > SIZE_RULER){
         orientation = TYPE_GUIDE_H;
@@ -319,7 +321,6 @@
   }
 
   var create = function (orientation) {
-    console.log('guides create');
     var guide = document.createElement('div');
     guide.setAttribute('class', orientation + '-guide guides show');
     guide.setAttribute('id', _guides.length);
@@ -350,13 +351,11 @@
   };
 
   var save = function (guide) {
-    console.log('guides save');
     guide.element.setAttribute('data-index', _guides.length);
     _guides.push(guide);
   };
 
   var move = function (event) {
-    console.log('move guide');
     var index = event.target.getAttribute('data-index');
     _currentGuide = _guides[index];
   }
@@ -375,13 +374,11 @@
   }
 
   var show = function () {
-    console.log('guides show');
     addClass(_shadow.getElementsByClassName('guides'), 'show');
     _visible = true;
   };
 
   var hide = function () {
-    console.log('guides hide');
     removeClass(_shadow.getElementsByClassName('guides'), 'show');
     _visible = false;
   };
