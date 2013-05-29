@@ -79,3 +79,18 @@ div.logo {
 #downloads a:last-child {
 	background-color: #e49260;
 }
+
+#support {
+	margin-top: 4em;
+	padding: 2em 20% 2em 20%;
+	text-align: center;
+}
+
+#support strong {
+	font-size: 1.4em;
+}
+
+#support p:last-child {
+	font-size: .8em;
+	color: #555454;
+}
