@@ -235,9 +235,12 @@
   var renderRuler = function (canvas, type) {
     var context = canvas.getContext('2d');
 
+    var height = (window.innerHeight > document.body.clientHeight) ? window.innerHeight : document.body.clientHeight;
+    var width = (window.innerWidth > document.body.clientWidth) ? window.innerWidth : document.body.clientWidth;
+
     // set height width
-    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : window.innerWidth;
-    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : window.innerHeight;
+    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : width;
+    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : height;
     // setup the line style
     context.strokeStyle = '#000';
     context.lineWidth = 1;
@@ -246,7 +249,7 @@
 
     var x = SIZE_RULER;
     var y = SIZE_RULER;
-    var count = (type === TYPE_RULER_V) ? Math.floor(window.innerHeight/10) : Math.floor(window.innerWidth/10);
+    var count = (type === TYPE_RULER_V) ? Math.floor(height/10) : Math.floor(width/10);
 
     for (var i = 0; i < count; i++) {
       var offset = Math.floor(SIZE_RULER/2);
