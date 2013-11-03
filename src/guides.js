@@ -83,7 +83,6 @@
           'position: absolute;' +
           'top: ' + SIZE_RULER + 'px;' +
           'left: ' + SIZE_RULER + 'px;' +
-          'width: 100%;' +
           'height: 1px;' +
           'background-color: #05F7F3;' +
           'color: red;' +
@@ -96,7 +95,6 @@
           'top: ' + SIZE_RULER + 'px;' +
           'left: ' + SIZE_RULER + 'px;' +
           'width: 1px;' +
-          'height: 100%;' +
           'background-color: #05F7F3;' +
           'color: red;' +
           'opacity: 0;' +
@@ -234,13 +232,11 @@
 
   var renderRuler = function (canvas, type) {
     var context = canvas.getContext('2d');
-
-    var height = (window.innerHeight > document.body.clientHeight) ? window.innerHeight : document.body.clientHeight;
-    var width = (window.innerWidth > document.body.clientWidth) ? window.innerWidth : document.body.clientWidth;
+    var currentDimensions = getDimensions();
 
     // set height width
-    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : width;
-    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : height;
+    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : currentDimensions.w;
+    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : currentDimensions.h;
     // setup the line style
     context.strokeStyle = '#000';
     context.lineWidth = 1;
@@ -249,7 +245,7 @@
 
     var x = SIZE_RULER;
     var y = SIZE_RULER;
-    var count = (type === TYPE_RULER_V) ? Math.floor(height/10) : Math.floor(width/10);
+    var count = (type === TYPE_RULER_V) ? Math.floor(currentDimensions.h/10) : Math.floor(currentDimensions.w/10);
 
     for (var i = 0; i < count; i++) {
       var offset = Math.floor(SIZE_RULER/2);
@@ -283,6 +279,7 @@
 
   var handleResize = function() {
     renderRulers();
+    resizeGuides();
   }
 
   var trackMouse = function(event) {
@@ -324,10 +321,19 @@
   }
 
   var create = function (orientation) {
+    var currentDimensions = getDimensions();
     var guide = document.createElement('div');
     guide.setAttribute('class', orientation + '-guide guides show');
     guide.setAttribute('id', _guides.length);
     guide.addEventListener('mousedown', move, false);
+    if(orientation === TYPE_GUIDE_H) {
+      guide.style.width = currentDimensions.w - SIZE_RULER + 'px';
+      console.log(guide.style.width);
+    }
+    else {
+      guide.style.height = currentDimensions.h - SIZE_RULER + 'px';
+      console.log(guide.style.height);
+    }
     _shadow.appendChild(guide);
     var guideObject = { "element" : guide, "type": orientation };
     return guideObject;
@@ -361,6 +367,18 @@
   var move = function (event) {
     var index = event.target.getAttribute('data-index');
     _currentGuide = _guides[index];
+  }
+
+  var resizeGuides = function() {
+    var currentDimensions = getDimensions();
+    for (var i = 0; i < _guides.length; i++) {
+      if(_guides[i].type === TYPE_GUIDE_H) {
+        _guides[i].element.style.width = currentDimensions.w - SIZE_RULER + 'px';
+      }
+      else {
+        _guides[i].element.style.height = currentDimensions.h - SIZE_RULER + 'px';
+      }
+    };
   }
 
 
@@ -397,6 +415,12 @@
       list[i].classList.remove(className);
     }
   };
+
+  var getDimensions = function () {
+    return {
+      h: (window.innerHeight > document.body.clientHeight) ? window.innerHeight : document.body.clientHeight,
+      w: (window.innerWidth > document.body.clientWidth) ? window.innerWidth : document.body.clientWidth };
+  }
 
   init();
 
