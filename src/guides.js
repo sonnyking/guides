@@ -25,6 +25,7 @@
 
   var _currentPosition = { x: 0, y: 0 };
 
+  //-- Init
 
   var init = function () {
     _visible = false;
@@ -47,6 +48,8 @@
     render();
   };
 
+  //-- Key events
+
   var keydownHandler = function (event) {
     if(event.keyCode === KEY_ONE || event.keyCode === KEY_TWO) {
       _keys['' + event.keyCode] = true;
@@ -62,6 +65,8 @@
     }
   }
 
+  //-- Visibility
+
   var toggleVisiblity = function () {
     if(_visible === false) {
       show();
@@ -75,6 +80,8 @@
     /* inject guides into the dom, this function
     id used by the node processes on the server side */
   };
+
+  //-- Injected styles
 
   var injectStyle = function () {
     _shadow.innerHTML = 
@@ -202,10 +209,16 @@
     _mouse.setAttribute('class','mouse guides');
     _shadow.appendChild(_mouse);
 
+    // render rulers
     renderRulers();
-
+    // render guides from local storage
+    if(typeof localStorage.guides !== 'undefined') {
+      renderGuides(JSON.parse(localStorage.guides));
+    }
     disableDraggingFor(document.getElementById("guides"));
   };
+
+  //-- Ruler creation
 
   var renderRulers = function () {
     removeRulers();
@@ -304,7 +317,7 @@
 
   }
 
-  // guide methods
+  //-- Guide creation and management
 
   var handleClick = function (event) {
     if(_visible && (_currentPosition.y <= SIZE_RULER || _currentPosition.x <= SIZE_RULER)) {
@@ -315,7 +328,6 @@
       else {
         orientation = TYPE_GUIDE_V;
       }
-
       _currentGuide = create(orientation);
     }
   }
@@ -323,16 +335,19 @@
   var create = function (orientation) {
     var currentDimensions = getDimensions();
     var guide = document.createElement('div');
-    guide.setAttribute('class', orientation + '-guide guides show');
+    if(_visible === true) {
+      guide.setAttribute('class', orientation + '-guide guides show');
+    }
+    else {
+      guide.setAttribute('class', orientation + '-guide guides');
+    }
     guide.setAttribute('id', _guides.length);
     guide.addEventListener('mousedown', move, false);
     if(orientation === TYPE_GUIDE_H) {
       guide.style.width = currentDimensions.w - SIZE_RULER + 'px';
-      console.log(guide.style.width);
     }
     else {
       guide.style.height = currentDimensions.h - SIZE_RULER + 'px';
-      console.log(guide.style.height);
     }
     _shadow.appendChild(guide);
     var guideObject = { "element" : guide, "type": orientation };
@@ -340,7 +355,7 @@
   }
 
   var place = function () {
-    if(_visible == false || typeof _currentGuide === 'undefined') { return false; }
+    if(typeof _currentGuide === 'undefined') { return false; }
     if((_currentGuide.type == TYPE_GUIDE_H && _currentGuide.element.offsetTop <= SIZE_RULER)
       || (_currentGuide.type == TYPE_GUIDE_V) && _currentGuide.element.offsetLeft <= SIZE_RULER) {
       _shadow.removeChild(_currentGuide.element);
@@ -362,6 +377,7 @@
   var save = function (guide) {
     guide.element.setAttribute('data-index', _guides.length);
     _guides.push(guide);
+    saveGuides();
   };
 
   var move = function (event) {
@@ -369,7 +385,7 @@
     _currentGuide = _guides[index];
   }
 
-  var resizeGuides = function() {
+  var resizeGuides = function () {
     var currentDimensions = getDimensions();
     for (var i = 0; i < _guides.length; i++) {
       if(_guides[i].type === TYPE_GUIDE_H) {
@@ -381,8 +397,35 @@
     };
   }
 
+  //-- Guide persistence
 
-  // general methods
+  var renderGuides = function (guides) {
+    for (var i = 0; i < guides.length; i++) {
+      _currentGuide = create(guides[i].type);
+      if(_currentGuide.type === TYPE_GUIDE_H){
+        _currentGuide.element.style.top = guides[i].top;
+      }
+      else {
+        _currentGuide.element.style.left = guides[i].left;
+      }
+      place();
+    };
+  }
+
+  var saveGuides = function () {
+    if(typeof Storage !== 'undefined') {
+      var guides = [];
+      for (var i = 0; i < _guides.length; i++) {
+        guides[i] = { type: _guides[i].type, left: _guides[i].element.style.left, top: _guides[i].element.style.top };
+      };
+      localStorage.guides = JSON.stringify(guides);
+    }
+    else {
+      // no local storage
+    }
+  }
+
+  //-- Utility methods
 
   var disableDraggingFor = function (element) {
     // this works for FireFox and WebKit in future according to http://help.dottoro.com/lhqsqbtn.php
@@ -423,6 +466,8 @@
   }
 
   init();
+
+  //-- Return public API
 
   return {
     render: render,
