@@ -341,7 +341,7 @@
     else {
       guide.setAttribute('class', orientation + '-guide guides');
     }
-    guide.setAttribute('id', _guides.length);
+    guide.setAttribute('id', Math.floor(Math.random()*10000000000));
     guide.addEventListener('mousedown', move, false);
     if(orientation === TYPE_GUIDE_H) {
       guide.style.width = currentDimensions.w - SIZE_RULER + 'px';
@@ -358,12 +358,24 @@
     if(typeof _currentGuide === 'undefined') { return false; }
     if((_currentGuide.type == TYPE_GUIDE_H && _currentGuide.element.offsetTop <= SIZE_RULER)
       || (_currentGuide.type == TYPE_GUIDE_V) && _currentGuide.element.offsetLeft <= SIZE_RULER) {
-      _shadow.removeChild(_currentGuide.element);
+      removeGuide(_currentGuide);
     }
     else {
       save(_currentGuide);
     }
     _currentGuide = undefined;
+  }
+
+  var removeGuide = function (guide) {
+    _shadow.removeChild(guide.element);
+    var cleanArray = [];
+    for (var i = 0; i < _guides.length; i++) {
+      if(_guides[i].element.id !== guide.element.id) {
+        cleanArray.push(_guides[i]);
+      }
+    };
+    _guides = cleanArray;
+    saveGuides();
   }
 
   var clear = function () {
