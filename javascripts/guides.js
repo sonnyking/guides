@@ -25,6 +25,7 @@
 
   var _currentPosition = { x: 0, y: 0 };
 
+  //-- Init
 
   var init = function () {
     _visible = false;
@@ -47,6 +48,8 @@
     render();
   };
 
+  //-- Key events
+
   var keydownHandler = function (event) {
     if(event.keyCode === KEY_ONE || event.keyCode === KEY_TWO) {
       _keys['' + event.keyCode] = true;
@@ -62,6 +65,8 @@
     }
   }
 
+  //-- Visibility
+
   var toggleVisiblity = function () {
     if(_visible === false) {
       show();
@@ -76,6 +81,8 @@
     id used by the node processes on the server side */
   };
 
+  //-- Injected styles
+
   var injectStyle = function () {
     _shadow.innerHTML = 
       '<style>' +
@@ -83,7 +90,6 @@
           'position: absolute;' +
           'top: ' + SIZE_RULER + 'px;' +
           'left: ' + SIZE_RULER + 'px;' +
-          'width: 100%;' +
           'height: 1px;' +
           'background-color: #05F7F3;' +
           'color: red;' +
@@ -96,7 +102,6 @@
           'top: ' + SIZE_RULER + 'px;' +
           'left: ' + SIZE_RULER + 'px;' +
           'width: 1px;' +
-          'height: 100%;' +
           'background-color: #05F7F3;' +
           'color: red;' +
           'opacity: 0;' +
@@ -204,10 +209,16 @@
     _mouse.setAttribute('class','mouse guides');
     _shadow.appendChild(_mouse);
 
+    // render rulers
     renderRulers();
-
+    // render guides from local storage
+    if(typeof localStorage.guides !== 'undefined') {
+      renderGuides(JSON.parse(localStorage.guides));
+    }
     disableDraggingFor(document.getElementById("guides"));
   };
+
+  //-- Ruler creation
 
   var renderRulers = function () {
     removeRulers();
@@ -234,10 +245,11 @@
 
   var renderRuler = function (canvas, type) {
     var context = canvas.getContext('2d');
+    var currentDimensions = getDimensions();
 
     // set height width
-    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : window.innerWidth;
-    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : window.innerHeight;
+    canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : currentDimensions.w;
+    canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : currentDimensions.h;
     // setup the line style
     context.strokeStyle = '#000';
     context.lineWidth = 1;
@@ -246,7 +258,7 @@
 
     var x = SIZE_RULER;
     var y = SIZE_RULER;
-    var count = (type === TYPE_RULER_V) ? Math.floor(window.innerHeight/10) : Math.floor(window.innerWidth/10);
+    var count = (type === TYPE_RULER_V) ? Math.floor(currentDimensions.h/10) : Math.floor(currentDimensions.w/10);
 
     for (var i = 0; i < count; i++) {
       var offset = Math.floor(SIZE_RULER/2);
@@ -280,6 +292,7 @@
 
   var handleResize = function() {
     renderRulers();
+    resizeGuides();
   }
 
   var trackMouse = function(event) {
@@ -304,7 +317,7 @@
 
   }
 
-  // guide methods
+  //-- Guide creation and management
 
   var handleClick = function (event) {
     if(_visible && (_currentPosition.y <= SIZE_RULER || _currentPosition.x <= SIZE_RULER)) {
@@ -315,23 +328,34 @@
       else {
         orientation = TYPE_GUIDE_V;
       }
-
       _currentGuide = create(orientation);
     }
   }
 
   var create = function (orientation) {
+    var currentDimensions = getDimensions();
     var guide = document.createElement('div');
-    guide.setAttribute('class', orientation + '-guide guides show');
+    if(_visible === true) {
+      guide.setAttribute('class', orientation + '-guide guides show');
+    }
+    else {
+      guide.setAttribute('class', orientation + '-guide guides');
+    }
     guide.setAttribute('id', _guides.length);
     guide.addEventListener('mousedown', move, false);
+    if(orientation === TYPE_GUIDE_H) {
+      guide.style.width = currentDimensions.w - SIZE_RULER + 'px';
+    }
+    else {
+      guide.style.height = currentDimensions.h - SIZE_RULER + 'px';
+    }
     _shadow.appendChild(guide);
     var guideObject = { "element" : guide, "type": orientation };
     return guideObject;
   }
 
   var place = function () {
-    if(_visible == false || typeof _currentGuide === 'undefined') { return false; }
+    if(typeof _currentGuide === 'undefined') { return false; }
     if((_currentGuide.type == TYPE_GUIDE_H && _currentGuide.element.offsetTop <= SIZE_RULER)
       || (_currentGuide.type == TYPE_GUIDE_V) && _currentGuide.element.offsetLeft <= SIZE_RULER) {
       _shadow.removeChild(_currentGuide.element);
@@ -353,6 +377,7 @@
   var save = function (guide) {
     guide.element.setAttribute('data-index', _guides.length);
     _guides.push(guide);
+    saveGuides();
   };
 
   var move = function (event) {
@@ -360,8 +385,47 @@
     _currentGuide = _guides[index];
   }
 
+  var resizeGuides = function () {
+    var currentDimensions = getDimensions();
+    for (var i = 0; i < _guides.length; i++) {
+      if(_guides[i].type === TYPE_GUIDE_H) {
+        _guides[i].element.style.width = currentDimensions.w - SIZE_RULER + 'px';
+      }
+      else {
+        _guides[i].element.style.height = currentDimensions.h - SIZE_RULER + 'px';
+      }
+    };
+  }
 
-  // general methods
+  //-- Guide persistence
+
+  var renderGuides = function (guides) {
+    for (var i = 0; i < guides.length; i++) {
+      _currentGuide = create(guides[i].type);
+      if(_currentGuide.type === TYPE_GUIDE_H){
+        _currentGuide.element.style.top = guides[i].top;
+      }
+      else {
+        _currentGuide.element.style.left = guides[i].left;
+      }
+      place();
+    };
+  }
+
+  var saveGuides = function () {
+    if(typeof Storage !== 'undefined') {
+      var guides = [];
+      for (var i = 0; i < _guides.length; i++) {
+        guides[i] = { type: _guides[i].type, left: _guides[i].element.style.left, top: _guides[i].element.style.top };
+      };
+      localStorage.guides = JSON.stringify(guides);
+    }
+    else {
+      // no local storage
+    }
+  }
+
+  //-- Utility methods
 
   var disableDraggingFor = function (element) {
     // this works for FireFox and WebKit in future according to http://help.dottoro.com/lhqsqbtn.php
@@ -395,7 +459,15 @@
     }
   };
 
+  var getDimensions = function () {
+    return {
+      h: (window.innerHeight > document.body.clientHeight) ? window.innerHeight : document.body.clientHeight,
+      w: (window.innerWidth > document.body.clientWidth) ? window.innerWidth : document.body.clientWidth };
+  }
+
   init();
+
+  //-- Return public API
 
   return {
     render: render,
