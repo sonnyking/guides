@@ -24,6 +24,7 @@
   options.RenderText = false;
 
   var _currentPosition = { x: 0, y: 0 };
+  var _bodyOffset = 0;
 
   //-- Init
 
@@ -247,12 +248,19 @@
     var context = canvas.getContext('2d');
     var currentDimensions = getDimensions();
 
+    // calculate and compensate for body margin/padding
+    _bodyOffset = 0 - (parseInt(window.getComputedStyle(document.body, null).getPropertyValue('padding-left')) +
+     parseInt(window.getComputedStyle(document.body, null).getPropertyValue('margin-left'))) + "px";
+    canvas.style.marginLeft = _bodyOffset;
+
     // set height width
     canvas.width = (type === TYPE_RULER_V) ? SIZE_RULER : currentDimensions.w;
     canvas.height = (type === TYPE_RULER_H) ? SIZE_RULER : currentDimensions.h;
+
     // setup the line style
     context.strokeStyle = '#000';
     context.lineWidth = 1;
+
     // anti-alias hack
     context.translate(0.5, 0.5);
 
@@ -343,12 +351,16 @@
     }
     guide.setAttribute('id', Math.floor(Math.random()*10000000000));
     guide.addEventListener('mousedown', move, false);
+    // set height/width
     if(orientation === TYPE_GUIDE_H) {
       guide.style.width = currentDimensions.w - SIZE_RULER + 'px';
     }
     else {
       guide.style.height = currentDimensions.h - SIZE_RULER + 'px';
     }
+    // compensate for body margin/padding
+    guide.style.marginLeft = _bodyOffset;
+    // add to shadow DOM
     _shadow.appendChild(guide);
     var guideObject = { "element" : guide, "type": orientation };
     return guideObject;
