@@ -1,3 +1,10 @@
+/* apply a natural box layout model to all elements */
+*, *:before, *:after {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
 body {
 	background-color: #cdc1ab;
 	font-family: "proxima-nova";
@@ -44,14 +51,12 @@ div.logo {
 	width: 33.3333%;
 	margin: 0;
 	padding: 1.5em 0 1.5em 0;
-}
-
-#downloads a {
 	font-size: .9em;
 	line-height: 1em;
 	text-align: center;
 	vertical-align: middle;
 }
+
 #downloads a strong {
 	text-transform: uppercase;
 }
@@ -93,4 +98,49 @@ div.logo {
 #support p:last-child {
 	font-size: .8em;
 	color: #555454;
+}
+
+/* responsive */
+
+/* Large desktop */
+@media (min-width: 1200px) {
+
+}
+
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+
+}
+
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+
+	#downloads a {
+		min-height: 140px;
+		text-align: center;
+		padding: 20px;
+		box-sizing: ;
+	}
+
+	#downloads span:first-of-type {
+		display: block;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	#downloads span:first-of-type img {
+		display: inline;
+		margin-left: 10px;
+	}
+
+	#downloads span:nth-of-type(2) {
+		display: block;
+		text-align: center;
+	}
+
+}
+
+/* Landscape phones and down */
+@media (max-width: 480px) {
+
 }
