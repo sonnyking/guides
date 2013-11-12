@@ -307,11 +307,12 @@
     _currentPosition.x = event.clientX;
     _currentPosition.y = event.clientY;
 
-    _mouse.style.left = (event.clientX + 10)  + "px";
+    _mouse.style.left = (event.clientX + parseInt(_bodyOffset) + 10)  + "px";
     _mouse.style.top = (event.clientY - 5)  + "px";
     _mouse.innerHTML = 'x:' + event.clientX + ' y:' + event.clientY;
 
     _vIndicator.style.top = event.clientY  + "px";
+    _vIndicator.style.left = _bodyOffset;
     _hIndicator.style.left = event.clientX  + "px";
 
     if(typeof _currentGuide != "undefined") {
