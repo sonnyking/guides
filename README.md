@@ -5,7 +5,7 @@ A really light weight lib to allow in-browser alignment during UI/UX development
 
 It began as a simple exploration of Chrome's Shadow DOM, in the future it'll be ported to all modern browsers. Please feel free to fork, extend or otherwise contribute.
 
-### Use
+### Use:
 
 It's pretty simple, just add the script tag to your html - bam your ready to go.
 
@@ -21,7 +21,7 @@ It's pretty simple, just add the script tag to your html - bam your ready to go.
 
 ![Guides screenshot](http://www.sonnyking.com/images/guides.png "guides")
 
-### Release Roadmap
+### Release Roadmap:
 
 v0.6.0
 
