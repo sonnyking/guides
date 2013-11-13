@@ -5,12 +5,19 @@ A really light weight lib to allow in-browser alignment during UI/UX development
 
 It began as a simple exploration of Chrome's Shadow DOM, in the future it'll be ported to all modern browsers. Please feel free to fork, extend or otherwise contribute.
 
+### Use
+
+It's pretty simple, just add the script tag to your html - bam your ready to go.
+
+        <script src="http://www.sonnyking.com/guides/javascripts/guides.js" type="text/javascript"></script>
+
 ### Features:
 
 * upper and left rulers.
 * mouse coordinate tracking.
 * place, move and remove guides.
 * guides persist via local storage.
+* guides self init on refresh.
 
 ![Guides screenshot](http://www.sonnyking.com/images/guides.png "guides")
 
