@@ -47,6 +47,16 @@
     window.onmousedown = handleClick;
     window.onmouseup = place;
     render();
+
+    // read local config and take any post-init action
+    var config = getConfiguration();
+    if(typeof config !== 'undefined' && config !== false) {
+      if(typeof config.visible !== 'undefined') {
+        if(config.visible === true) {
+          toggleVisiblity();
+        }
+      }
+    }
   };
 
   //-- Key events
@@ -75,6 +85,7 @@
     else {
       hide();
     }
+    saveConfiguration();
   };
 
   var inject = function () {
@@ -425,15 +436,21 @@
   //-- Guide persistence
 
   var renderGuides = function (guides) {
+    var dimensions = getDimensions();
     for (var i = 0; i < guides.length; i++) {
-      _currentGuide = create(guides[i].type);
-      if(_currentGuide.type === TYPE_GUIDE_H){
-        _currentGuide.element.style.top = guides[i].top;
+      if(guides[i].top > dimensions.h || guides[i].left > dimensions.w) {
+        // don't create the guide, it's beyond the "canvas"
       }
       else {
-        _currentGuide.element.style.left = guides[i].left;
+        _currentGuide = create(guides[i].type);
+        if(_currentGuide.type === TYPE_GUIDE_H){
+          _currentGuide.element.style.top = guides[i].top;
+        }
+        else {
+          _currentGuide.element.style.left = guides[i].left;
+        }
+        place();
       }
-      place();
     };
   }
 
@@ -447,6 +464,28 @@
     }
     else {
       // no local storage
+    }
+  }
+
+  var saveConfiguration = function () {
+    if(typeof Storage !== 'undefined') {
+      var config = {
+        visible: _visible
+      };
+
+      localStorage.config = JSON.stringify(config);
+    }
+    else {
+      // no local storage
+    }
+  }
+
+  var getConfiguration = function () {
+    if(typeof Storage !== 'undefined' && typeof localStorage.config !== 'undefined') {
+      return JSON.parse(localStorage.config);
+    }
+    else {
+      return false;
     }
   }
 
