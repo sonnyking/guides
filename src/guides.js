@@ -47,6 +47,16 @@
     window.onmousedown = handleClick;
     window.onmouseup = place;
     render();
+
+    // read local config and take any post-init action
+    var config = getConfiguration();
+    if(typeof config !== 'undefined' && config !== false) {
+      if(typeof config.visible !== 'undefined') {
+        if(config.visible === true) {
+          toggleVisiblity();
+        }
+      }
+    }
   };
 
   //-- Key events
@@ -75,6 +85,7 @@
     else {
       hide();
     }
+    saveConfiguration();
   };
 
   var inject = function () {
@@ -447,6 +458,28 @@
     }
     else {
       // no local storage
+    }
+  }
+
+  var saveConfiguration = function () {
+    if(typeof Storage !== 'undefined') {
+      var config = {
+        visible: _visible
+      };
+
+      localStorage.config = JSON.stringify(config);
+    }
+    else {
+      // no local storage
+    }
+  }
+
+  var getConfiguration = function () {
+    if(typeof Storage !== 'undefined' && typeof localStorage.config !== 'undefined') {
+      return JSON.parse(localStorage.config);
+    }
+    else {
+      return false;
     }
   }
 
