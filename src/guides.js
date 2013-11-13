@@ -436,15 +436,21 @@
   //-- Guide persistence
 
   var renderGuides = function (guides) {
+    var dimensions = getDimensions();
     for (var i = 0; i < guides.length; i++) {
-      _currentGuide = create(guides[i].type);
-      if(_currentGuide.type === TYPE_GUIDE_H){
-        _currentGuide.element.style.top = guides[i].top;
+      if(guides[i].top > dimensions.h || guides[i].left > dimensions.w) {
+        // don't create the guide, it's beyond the "canvas"
       }
       else {
-        _currentGuide.element.style.left = guides[i].left;
+        _currentGuide = create(guides[i].type);
+        if(_currentGuide.type === TYPE_GUIDE_H){
+          _currentGuide.element.style.top = guides[i].top;
+        }
+        else {
+          _currentGuide.element.style.left = guides[i].left;
+        }
+        place();
       }
-      place();
     };
   }
 
