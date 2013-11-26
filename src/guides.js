@@ -30,8 +30,12 @@
 
   var init = function () {
 
-
-    if(24 >= parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10)) {
+    if(window.navigator.appVersion.indexOf('Chrome') != -1) {
+      if(24 >= parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10)) {
+        return false;
+      }
+    }
+    else {
       return false;
     }
 
