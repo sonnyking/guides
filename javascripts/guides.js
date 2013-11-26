@@ -29,6 +29,12 @@
   //-- Init
 
   var init = function () {
+
+
+    if(24 >= parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10)) {
+      return false;
+    }
+
     _visible = false;
     _rulers = ["horizontal","vertical"];
     _guides = new Array();
@@ -58,6 +64,10 @@
       }
     }
   };
+
+  //-- Mode detection
+
+
 
   //-- Key events
 
