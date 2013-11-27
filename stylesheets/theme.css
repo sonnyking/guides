@@ -100,6 +100,39 @@ div.logo {
 	color: #555454;
 }
 
+/* compatibility */
+
+div.compatibility {
+	display: none;
+	margin-right: auto;
+	margin-left: auto;
+	margin-bottom: 20px;
+	height: auto;
+	width: 400px;
+	padding: 20px;
+	background-color: black;
+	border: 1px solid rgba(12,12,12);
+}
+
+div.compatibility > div > h1 {
+	margin-top: 0;
+	font-size: 16px;
+	color: white;
+}
+
+div.compatibility > div > p {
+	font-size: 12px;
+	color: white;
+	margin-bottom: 20px;
+}
+
+div.compatibility > div > a,
+div.compatibility > div > a:visited {
+	padding: 5px 10px;
+	color: white;
+	background-color: gray;
+}
+
 /* responsive */
 
 /* Large desktop */

@@ -32,10 +32,12 @@
 
     if(window.navigator.appVersion.indexOf('Chrome') != -1) {
       if(24 >= parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10)) {
+        displayMessage();
         return false;
       }
     }
     else {
+      displayMessage();
       return false;
     }
 
@@ -69,9 +71,12 @@
     }
   };
 
-  //-- Mode detection
+  //-- Mode detection message
 
-
+  var displayMessage = function () {
+    var element = document.getElementById('5634542754743');
+    element.style.display = "block";
+  }
 
   //-- Key events
 
